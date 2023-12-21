@@ -1,0 +1,62 @@
+pipeline:
+  identifier: Build_raghavharness_cpp_cmake_1703137799637
+  name: Build cpp-cmake
+  orgIdentifier: default
+  projectIdentifier: autogen
+  properties:
+    ci:
+      codebase:
+        build: <+input>
+        connectorRef: account.Github
+        repoName: raghavharness/cpp-cmake
+  stages:
+    - stage:
+        identifier: build
+        name: build
+        spec:
+          cloneCodebase: true
+          execution:
+            steps:
+              - step:
+                  identifier: installandupdatedeps
+                  name: install and update deps
+                  spec:
+                    command: |-
+                      sudo apt-get update
+                      sudo apt-get install libgtest-dev
+                  timeout: ""
+                  type: Run
+              - step:
+                  identifier: cmakebuildmake
+                  name: cmake build  make
+                  spec:
+                    command: mkdir build && cd build && cmake .. && cmake --build .
+                  timeout: ""
+                  type: Run
+              - step:
+                  identifier: runtests
+                  name: run tests
+                  spec:
+                    command: cd build && make check
+                  timeout: ""
+                  type: Run
+              - step:
+                  identifier: dockerbuild
+                  name: docker_build
+                  spec:
+                    image: plugins/docker
+                    settings:
+                      dry_run: "true"
+                      password: <+input>
+                      repo: hello/world
+                      tags: latest
+                      username: <+input>
+                  timeout: ""
+                  type: Plugin
+          platform:
+            arch: Amd64
+            os: Linux
+          runtime:
+            spec: {}
+            type: Cloud
+        type: CI
